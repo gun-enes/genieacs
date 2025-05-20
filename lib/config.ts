@@ -19,7 +19,7 @@ const options = {
   EXT_DIR: { type: "path", default: resolve(ROOT_DIR, "config/ext") },
   MONGODB_CONNECTION_URL: {
     type: "string",
-    default: "mongodb://127.0.0.1/genieacs",
+    default: "mongodb://mongo:27017/genieacs",
   },
 
   CWMP_WORKER_PROCESSES: { type: "int", default: 0 },

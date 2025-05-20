@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  genieacs-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: geniacs-ui
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  genieacs-cwmp:
+    build:
+      context: .
+      dockerfile: Dockerfile.cwmp
+    container_name: geniacs-cwmp
+    ports:
+      - "7547:7547"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  genieacs-nbi:
+    build:
+      context: .
+      dockerfile: Dockerfile.nbi
+    container_name: geniacs-nbi
+    ports:
+      - "7557:7557"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  genieacs-fs:
+    build:
+      context: .
+      dockerfile: Dockerfile.fs
+    container_name: geniacs-fs
+    ports:
+      - "7567:7567"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-geniacs
+    ports:
+      - "27017:27017"
+    volumes:
+      - geniacs-data:/data/db
+    networks:
+      - app-network
+
+volumes:
+  geniacs-data:
+networks:
+  app-network:
