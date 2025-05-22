@@ -1,54 +1,73 @@
-version: '3.8'
-
 services:
-  genieacs-ui:
+
+  builder:
     build:
       context: .
-      dockerfile: Dockerfile.ui
-    container_name: geniacs-ui
+      dockerfile: Dockerfile.builder
+    container_name: build-artifacts
+    command: sleep infinity
+    volumes:
+      - build_volume:/app/
+
+  geniacs-ui:
+    image: node:18
+    container_name: genieacs-ui
     ports:
       - "3000:3000"
     depends_on:
       - mongo
+      - builder
+    working_dir: /app
+    volumes:
+      - build_volume:/app/:ro
     networks:
       - app-network
-
-  genieacs-cwmp:
-    build:
-      context: .
-      dockerfile: Dockerfile.cwmp
-    container_name: geniacs-cwmp
+    command: node dist/bin/genieacs-ui --ui-jwt-secret secret
+ 
+  geniacs-cwmp:
+    image: node:18
+    container_name: genieacs-cwmp
     ports:
       - "7547:7547"
     depends_on:
       - mongo
+      - builder
+    working_dir: /app
+    volumes:
+      - build_volume:/app/:ro
     networks:
       - app-network
-
-  genieacs-nbi:
-    build:
-      context: .
-      dockerfile: Dockerfile.nbi
-    container_name: geniacs-nbi
+    command: node dist/bin/genieacs-cwmp
+  
+  geniacs-nbi:
+    image: node:18
+    container_name: genieacs-nbi
     ports:
       - "7557:7557"
     depends_on:
       - mongo
+      - builder
+    working_dir: /app
+    volumes:
+      - build_volume:/app/:ro
     networks:
       - app-network
-
-  genieacs-fs:
-    build:
-      context: .
-      dockerfile: Dockerfile.fs
-    container_name: geniacs-fs
+    command: node dist/bin/genieacs-nbi
+   
+  geniacs-fs:
+    image: node:18
+    container_name: genieacs-fs
     ports:
       - "7567:7567"
     depends_on:
       - mongo
+      - builder
+    working_dir: /app
+    volumes:
+      - build_volume:/app/:ro
     networks:
       - app-network
-
+    command: node dist/bin/genieacs-fs
 
   mongo:
     image: mongo:latest
@@ -61,6 +80,7 @@ services:
       - app-network
 
 volumes:
+  build_volume:
   geniacs-data:
 networks:
   app-network:
